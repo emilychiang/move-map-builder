@@ -1,0 +1,77 @@
+<html>
+<head>
+  <title>Move map</title>
+  <link rel="stylesheet" type="text/css" href="style.css" />
+
+  <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script> 
+  <script type="text/javascript" src="tools.js"></script>
+  <script type="text/javascript" src="moves_study1.js"></script>
+  <script type="text/javascript" src="htmlbuilder.js"></script>
+  <script type="text/javascript" src="data/refs.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+
+      var set = datas[0];
+      
+      if (window.location.hash) {
+        var location_hash = window.location.hash.substring(1);
+        set = datas[location_hash];
+      }
+
+      // inital data setup
+      rebuildTable(set);
+
+      if (set.transcript_num) {
+        $('#trn').text('Transcript ' + set.transcript_num);
+      }
+
+      // add a key, nav, etc
+      $('#key').append(keyBuilder(moves, colmap));
+      $('#nav').append(dataNavBuilder(datas));
+      $('#nav a').on('click', function(e) {
+        e.preventDefault();
+
+        var targ = $(this).attr('href');
+        
+        window.location.hash = '#' + targ
+
+        rebuildTable(datas[targ]);
+
+        if (datas[targ].transcript_num) {
+          $('#trn').text('Transcript ' + datas[targ].transcript_num);
+        } 
+        else if (datas[targ].account_num) {
+          $('#trn').text('Profile ' + datas[targ].account_num);
+        }
+
+      })
+    });
+
+    function rebuildTable (set) {
+      // clear first
+      $('#viz').empty();
+
+      jQuery.get('data/csvs_20170128/' + set.file, function(res) {
+
+        var data = CSVToArray(res);
+        var tbl = tableBuilder(data, set.nomRef, set);
+
+        $('#viz').append(tbl);
+
+      });
+    }
+  </script>
+
+</head>
+<body>
+  <div id="info">
+    <h1><span id="trn"></span></h1>
+    <p>Key</p>
+    <div id="key"></div>
+    <div id="nav"></div>
+  </div>
+  <div id="viz"></div>
+</body>
+</html>
